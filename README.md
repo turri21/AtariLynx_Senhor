@@ -1,3 +1,7 @@
+-=(AtariLynx_Senhor notes)=-
+
+Tested: Working Video 720p, 1080p & Sound
+
 # [Atari Lynx](https://en.wikipedia.org/wiki/Atari_Lynx) for [MiSTer Platform](https://github.com/MiSTer-devel/Main_MiSTer/wiki)
 
 
