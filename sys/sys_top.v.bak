@@ -69,10 +69,8 @@ module sys_top
 
 `else
 	//////////// VGA ///////////
-   //Senhor: Do not comment the 3x RGB VGA signals or there will be color 
-	//issues on the shape's edges.
-   //Moving the bits from [5:0] to [6:1] to fix a weird cracking audio issue, 
-	//related to the 0 bit of the RGB signals.  
+        //Senhor: Do not comment the 3x RBG VGA signals or there will be color issues on the shape's edges.
+        // Moving the bits from [5:0] to [6:1] to fix a weird cracking audio issue, related to the 0 bit of the RGB signals.  
 	output  [6:1] VGA_R,
 	output  [6:1] VGA_G,
 	output  [6:1] VGA_B,
