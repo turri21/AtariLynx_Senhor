@@ -41,7 +41,7 @@ module sys_top
 	output        HDMI_TX_HS,
 	output        HDMI_TX_VS,
 	
-	input         HDMI_TX_INT,
+	//input         HDMI_TX_INT,
 
 	//////////// SDR ///////////
 	output [12:0] SDRAM_A,
@@ -54,7 +54,7 @@ module sys_top
 	output        SDRAM_nCS,
 	output  [1:0] SDRAM_BA,
 	output        SDRAM_CLK,
-	output        SDRAM_CKE,
+	//output        SDRAM_CKE,
 
 `ifdef MISTER_DUAL_SDRAM
 	////////// SDR #2 //////////
@@ -69,14 +69,15 @@ module sys_top
 
 `else
 	//////////// VGA ///////////
-   //Senhor: Do not comment the 3x RGB VGA signals or there will be 
-	//bright lines at the edges of the shapes.  
- 
-//	output  [5:0] VGA_R,
-//	output  [5:0] VGA_G,
-//	output  [5:0] VGA_B,
-	inout         VGA_HS,
-	output		  VGA_VS,
+   //Senhor: Do not comment the 3x RGB VGA signals or there will be color 
+	//issues on the shape's edges.
+   //Moving the bits from [5:0] to [6:1] to fix a color and probably an audio issue
+	//related to the 0 bit of the RGB signals.
+	output  [6:1] VGA_R,
+	output  [6:1] VGA_G,
+	output  [6:1] VGA_B,
+	//inout       VGA_HS,
+	//output		  VGA_VS,
 	input         VGA_EN,  // active low
 
 	/////////// AUDIO //////////
@@ -91,28 +92,28 @@ module sys_top
 
 	//////////// I/O ///////////
 	//output        LED_USER,
-	output        LED_HDD,
-	output        LED_POWER,
+	//output        LED_HDD,
+	//output        LED_POWER,
 	//input         BTN_USER,
-	input         BTN_OSD,
-	input         BTN_RESET,
+	//input         BTN_OSD,
+	//input         BTN_RESET,
 `endif
 
 	////////// I/O ALT /////////
-//	output        SD_SPI_CS,
-//	input         SD_SPI_MISO,
-//	output        SD_SPI_CLK,
-//	output        SD_SPI_MOSI,
+	//output        SD_SPI_CS,
+	//input         SD_SPI_MISO,
+	//output        SD_SPI_CLK,
+	//output        SD_SPI_MOSI,
 
-//	inout         SDCD_SPDIF,
-//	output        IO_SCL,
-//	inout         IO_SDA,
+	//inout         SDCD_SPDIF,
+	//output        IO_SCL,
+	//inout         IO_SDA,
 
 	////////// ADC //////////////
-//	output        ADC_SCK,
-//	input         ADC_SDO,
-//	output        ADC_SDI,
-//	output        ADC_CONVST,
+	//output        ADC_SCK,
+	//input         ADC_SDO,
+	//output        ADC_SDI,
+	//output        ADC_CONVST,
 
 	////////// MB KEY ///////////
 	input   [1:0] KEY,
@@ -124,7 +125,7 @@ module sys_top
 	output  [7:0] LED
 
 	///////// USER IO ///////////
-//	inout   [6:0] USER_IO
+	//inout   [6:0] USER_IO
 );
 
 
@@ -135,8 +136,8 @@ wire SD_CS, SD_CLK, SD_MOSI, SD_MISO, SD_CD;
 `ifndef MISTER_DUAL_SDRAM
 	assign SD_CD       = mcp_en ? mcp_sdcd : SDCD_SPDIF;
 //	assign SD_MISO     = SD_CD | (mcp_en ? SD_SPI_MISO : (VGA_EN | SDIO_DAT[0]));
-	assign SD_SPI_CS   = mcp_en ?  (mcp_sdcd  ? 1'bZ : SD_CS) : (sog & ~cs1 & ~VGA_EN) ? 1'b1 : 1'bZ;
-   assign SD_SPI_CLK  = (~mcp_en | mcp_sdcd) ? 1'bZ : SD_CLK;
+//	assign SD_SPI_CS   = mcp_en ?  (mcp_sdcd  ? 1'bZ : SD_CS) : (sog & ~cs1 & ~VGA_EN) ? 1'b1 : 1'bZ;
+	assign SD_SPI_CLK  = (~mcp_en | mcp_sdcd) ? 1'bZ : SD_CLK;
 	assign SD_SPI_MOSI = (~mcp_en | mcp_sdcd) ? 1'bZ : SD_MOSI;
 	assign {SDIO_CLK,SDIO_CMD,SDIO_DAT} = av_dis ? 6'bZZZZZZ : (mcp_en | (SDCD_SPDIF & ~SW[2])) ? {vga_g,vga_r,vga_b} : {SD_CLK,SD_MOSI,SD_CS,3'bZZZ};
 `else
@@ -156,9 +157,6 @@ wire led_p =  led_power[1] ? ~led_power[0] : 1'b0;
 wire led_d =  led_disk[1]  ? ~led_disk[0]  : ~(led_disk[0] | gp_out[29]);
 wire led_u = ~led_user;
 wire led_locked;
-
-//Senhor: BTN_USER does not exist on this board.
-wire BTN_USER = 1'b1;
 
 //LEDs on de10-nano board
 assign LED = (led_overtake & led_state) | (~led_overtake & {1'b0,led_locked,1'b0, ~led_p, 1'b0, ~led_d, 1'b0, ~led_u});
@@ -184,12 +182,12 @@ mcp23009 mcp23009
 wire io_dig = mcp_en ? mcp_mode : SW[3];
 
 `ifndef MISTER_DUAL_SDRAM
-	wire   av_dis    = io_dig | VGA_EN;
+//	wire   av_dis    = io_dig | VGA_EN;
 	assign LED_POWER = av_dis ? 1'bZ : mcp_en ? de1          : led_p ? 1'bZ : 1'b0;
 	assign LED_HDD   = av_dis ? 1'bZ : mcp_en ? (sog & ~cs1) : led_d ? 1'bZ : 1'b0;
-	assign LED_USER  = av_dis ? 1'bZ : mcp_en ? ~vga_tx_clk  : led_u ? 1'bZ : 1'b0;
+	//assign LED_USER  = av_dis ? 1'bZ : mcp_en ? ~vga_tx_clk  : led_u ? 1'bZ : 1'b0;
 	assign LED_USER  = VGA_TX_CLK;
-	wire   BTN_DIS   = VGA_EN;
+//	wire   BTN_DIS   = VGA_EN;
 `else
 	wire   BTN_RESET = SDRAM2_DQ[9];
 	wire   BTN_OSD   = SDRAM2_DQ[13];
@@ -204,15 +202,15 @@ always @(posedge FPGA_CLK2_50) begin
 	reg btn_up = 0;
 	reg btn_en = 0;
 
-	btn_up <= BTN_RESET & BTN_OSD & BTN_USER;
+//	btn_up <= BTN_RESET & BTN_OSD & BTN_USER;
 	if(~reset & btn_up & ~&btn_timeout) btn_timeout <= btn_timeout + 1'd1;
-	btn_en <= ~BTN_DIS;
+//	btn_en <= ~BTN_DIS;
 	BTN_EN <= &btn_timeout & btn_en;
 end
 
-wire btn_r = (mcp_en | SW[3]) ? mcp_btn[1] : (BTN_EN & ~BTN_RESET);
-wire btn_o = (mcp_en | SW[3]) ? mcp_btn[2] : (BTN_EN & ~BTN_OSD  );
-wire btn_u = (mcp_en | SW[3]) ? mcp_btn[0] : (BTN_EN & ~BTN_USER );
+//wire btn_r = (mcp_en | SW[3]) ? mcp_btn[1] : (BTN_EN & ~BTN_RESET);
+//wire btn_o = (mcp_en | SW[3]) ? mcp_btn[2] : (BTN_EN & ~BTN_OSD  );
+//wire btn_u = (mcp_en | SW[3]) ? mcp_btn[0] : (BTN_EN & ~BTN_USER );
 
 reg btn_user, btn_osd;
 always @(posedge FPGA_CLK2_50) begin
@@ -224,11 +222,11 @@ always @(posedge FPGA_CLK2_50) begin
 	if(div > 100000) div <= 0;
 
 	if(!div) begin
-		deb_user <= {deb_user[6:0], btn_u | ~KEY[1]};
+//		deb_user <= {deb_user[6:0], btn_u | ~KEY[1]};
 		if(&deb_user) btn_user <= 1;
 		if(!deb_user) btn_user <= 0;
 
-		deb_osd <= {deb_osd[6:0], btn_o | ~KEY[0]};
+//		deb_osd <= {deb_osd[6:0], btn_o | ~KEY[0]};
 		if(&deb_osd) btn_osd <= 1;
 		if(!deb_osd) btn_osd <= 0;
 	end
