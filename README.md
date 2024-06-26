@@ -2,7 +2,7 @@
 
 Tested: Working Video 720p, 1080p & Sound
 
-Changes: VGA_R [5:0], VGA_G [5:0], VGA_B [5:0] ---> VGA_R [6:1],  VGA_G [6:1], VGA_B [6:1]
+Changes: sys/sys_top.v -- VGA_R [5:0], VGA_G [5:0], VGA_B [5:0] ---> VGA_R [6:1], VGA_G [6:1], VGA_B [6:1]
 
 # [Atari Lynx](https://en.wikipedia.org/wiki/Atari_Lynx) for [MiSTer Platform](https://github.com/MiSTer-devel/Main_MiSTer/wiki)
 
